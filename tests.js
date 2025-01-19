@@ -1,26 +1,23 @@
-// Import necessary modules
+import supertest from 'supertest';
 import express from 'express';
 import cors from 'cors';
 
-// Initialize the Express app
+// Initialize Express app for testing
 const app = express();
 
-// Middleware for handling CORS - Allow requests from your frontend domain
+// Use the same middleware configuration as your main server
 app.use(cors({
     origin: 'https://ephemail.onrender.com', // Allow this domain
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization'],
 }));
-
-// Middleware for parsing JSON bodies
 app.use(express.json());
 
-// Dummy data for testing (replace with actual logic)
+// Dummy data for testing
 let account = null;
 
 // Create Account Route
 app.post('/create-account', (req, res) => {
-    // Simulate account creation and return a random email address
     account = { username: 'randomemail@example.com' };
     res.json({ status: true, data: account });
 });
@@ -49,7 +46,38 @@ app.delete('/delete-account', (req, res) => {
     res.json({ status: true, message: 'Account deleted successfully.' });
 });
 
-// Start the server
-app.listen(3000, () => {
-    console.log('Server is running on http://localhost:3000');
+// Test the API
+describe('API Tests', () => {
+    it('should create an account', async () => {
+        const res = await supertest(app).post('/create-account');
+        expect(res.status).toBe(200);
+        expect(res.body.status).toBe(true);
+        expect(res.body.data).toHaveProperty('username', 'randomemail@example.com');
+    });
+
+    it('should get account data', async () => {
+        const res = await supertest(app).get('/me');
+        expect(res.status).toBe(200);
+        expect(res.body.status).toBe(true);
+        expect(res.body.data).toHaveProperty('username');
+    });
+
+    it('should get messages', async () => {
+        const res = await supertest(app).get('/messages');
+        expect(res.status).toBe(200);
+        expect(res.body.status).toBe(true);
+        expect(res.body.messages).toBeInstanceOf(Array);
+    });
+
+    it('should delete the account', async () => {
+        const res = await supertest(app).delete('/delete-account');
+        expect(res.status).toBe(200);
+        expect(res.body.status).toBe(true);
+        expect(res.body.message).toBe('Account deleted successfully.');
+    });
+});
+
+// Start the test server (optional, just in case you want to run the server during tests)
+app.listen(4000, () => {
+    console.log('Test server is running on http://localhost:4000');
 });
