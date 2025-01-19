@@ -1,48 +1,55 @@
-import test from "node:test";
-import Mailjs from "./dist/mailjs.mjs";
+// Import necessary modules
+import express from 'express';
+import cors from 'cors';
 
-const mailjs = new Mailjs();
+// Initialize the Express app
+const app = express();
 
-test("Get a domain, create an account and log in.", async () => {
-    const { status, message } = await mailjs.createOneAccount();
+// Middleware for handling CORS - Allow requests from your frontend domain
+app.use(cors({
+    origin: 'https://ephemail.onrender.com', // Allow this domain
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+}));
 
-    if (!status) throw message;
+// Middleware for parsing JSON bodies
+app.use(express.json());
+
+// Dummy data for testing (replace with actual logic)
+let account = null;
+
+// Create Account Route
+app.post('/create-account', (req, res) => {
+    // Simulate account creation and return a random email address
+    account = { username: 'randomemail@example.com' };
+    res.json({ status: true, data: account });
 });
 
-test("Get account data.", async () => {
-    const { status, message } = await mailjs.me();
-
-    if (!status) throw message;
+// Get Account Data Route
+app.get('/me', (req, res) => {
+    if (account) {
+        res.json({ status: true, data: account });
+    } else {
+        res.status(404).json({ status: false, message: 'Account not found.' });
+    }
 });
 
-test("List messages.", async () => {
-    const { status, message } = await mailjs.getMessages();
-
-    if (!status) throw message;
+// Get Messages Route (Dummy)
+app.get('/messages', (req, res) => {
+    if (account) {
+        res.json({ status: true, messages: ['Test Message 1', 'Test Message 2'] });
+    } else {
+        res.status(404).json({ status: false, message: 'No messages available.' });
+    }
 });
 
-test("Log in with JWT token.", async () => {
-    const token = mailjs.token;
-
-    const { status, message } = await mailjs.loginWithToken(token);
-
-    if(!status) throw message;
+// Delete Account Route
+app.delete('/delete-account', (req, res) => {
+    account = null;
+    res.json({ status: true, message: 'Account deleted successfully.' });
 });
 
-test("Test listener.", (_, done) => {
-    const onOpen = () => {
-        mailjs.off();
-        done();
-    };
-
-    const onError = err => done(err);
-
-    mailjs.on("open", onOpen);
-    mailjs.on("error", onError);
-});
-
-test("Delete account.", async () => {
-    const { status, message } = await mailjs.deleteMe();
-
-    if (!status) throw message;
+// Start the server
+app.listen(3000, () => {
+    console.log('Server is running on http://localhost:3000');
 });
