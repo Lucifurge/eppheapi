@@ -29,7 +29,8 @@ app.get('/api/create-email', async (req, res) => {
     });
     res.json(response.data); // Return the temporary email created
   } catch (error) {
-    res.status(500).send('Error creating temporary email: ' + error.message);
+    console.error('Error creating temporary email:', error);
+    res.status(500).json({ message: 'Error creating temporary email', error: error.message }); // Return a JSON error response
   }
 });
 
@@ -45,7 +46,8 @@ app.get('/api/email/:mail_id', async (req, res) => {
     });
     res.json(response.data); // Return the fetched email details
   } catch (error) {
-    res.status(500).send('Error fetching email: ' + error.message);
+    console.error('Error fetching email:', error);
+    res.status(500).json({ message: 'Error fetching email', error: error.message }); // Return a JSON error response
   }
 });
 
