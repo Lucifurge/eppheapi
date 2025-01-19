@@ -1,11 +1,22 @@
 const express = require('express');
 const axios = require('axios');
+const cors = require('cors');
 const app = express();
 const port = process.env.PORT || 3000;
 
 // Get your RapidAPI key from environment variables
 const apiKey = process.env.RAPIDAPI_KEY; // Securely get the API key
 const apiHost = 'privatix-temp-mail-v1.p.rapidapi.com';
+
+// Enable CORS for the specific frontend URL
+const allowedOrigin = 'https://ephemail.onrender.com';
+
+// Middleware to enable CORS for specific origin
+app.use(cors({
+  origin: allowedOrigin, // Only allow requests from this origin
+  methods: ['GET', 'POST'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 
 // Endpoint to create temporary email
 app.get('/api/create-email', async (req, res) => {
