@@ -38,7 +38,8 @@
   },
   "homepage": "https://github.com/cemalgnlts/Mailjs#readme",
   "dependencies": {
-    "eventsource": "^2.0.2"
+    "eventsource": "^2.0.2",
+    "cors": "2.8.5" 
   },
   "devDependencies": {
     "@rollup/plugin-terser": "^0.4.4",
