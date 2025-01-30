@@ -1,4 +1,4 @@
-onst axios = require('axios');
+const axios = require('axios');
 const { faker } = require('@faker-js/faker');
 const express = require('express');
 const cors = require('cors');
