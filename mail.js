@@ -13,23 +13,23 @@ const HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
 };
 
-// Function to fetch available domains
+// Function to fetch available domains from mail.tm API
 async function getDomains() {
     try {
         const response = await axios.get('https://api.mail.tm/domains', { headers: HEADERS });
-        return response.data['hydra:member'];
+        return response.data['hydra:member'].map(domain => domain.domain);
     } catch (error) {
         console.error('Error fetching domains:', error.message);
         return [];
     }
 }
 
-// Generate random email credentials
+// Generate random email credentials using a provided domain
 function generateRandomCredentials(domain) {
+    const username = faker.internet.userName().toLowerCase().replace(/[^a-z0-9]/g, '');
     return {
-        username: faker.internet.userName(),
-        password: faker.internet.password(),
-        email: `${faker.internet.userName()}@${domain}`
+        email: `${username}@${domain}`,
+        password: faker.internet.password()
     };
 }
 
@@ -74,19 +74,27 @@ async function fetchMessages(token) {
     }
 }
 
+// API Endpoint to get available domains
+app.get('/domains', async (req, res) => {
+    const domains = await getDomains();
+    
+    if (domains.length > 0) {
+        return res.status(200).json({ domains });
+    } else {
+        return res.status(500).json({ message: 'Failed to fetch domains' });
+    }
+});
+
 // API Endpoint to create an account
 app.post('/create-account', async (req, res) => {
-    const domains = await getDomains();
-    if (domains.length === 0) {
-        return res.status(400).json({ message: 'No domains available' });
+    const { domain } = req.body;
+
+    if (!domain) {
+        return res.status(400).json({ message: 'Domain is required' });
     }
 
-    let account = null;
-    for (const domain of domains) {
-        account = await createAccount(domain.domain);
-        if (account) break; // Use the first successful domain
-    }
-
+    const account = await createAccount(domain);
+    
     if (account) {
         return res.status(200).json(account);
     } else {
